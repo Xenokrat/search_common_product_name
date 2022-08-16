@@ -31,11 +31,14 @@ class DataHandler:
 
     @staticmethod
     def make_pretty_str(string: str) -> str:
-        string = string.lower()
-        string = re.sub('[^\w\s_]', " ", string)
-        string = re.sub("_", " ", string)
-        string = add_space_between_num_and_char(string)
-        string = " ".join(string.split())
+        try:
+            string = string.lower()
+            string = re.sub('[^\w\s_]', " ", string)
+            string = re.sub("_", " ", string)
+            string = add_space_between_num_and_char(string)
+            string = " ".join(string.split())
+        except AttributeError:
+            print(string)
         return string
 
     def make_client_sku(self):

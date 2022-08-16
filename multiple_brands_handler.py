@@ -33,7 +33,8 @@ class MultipleBrands(CommonWords):
             .sort_values(by=['brand_name', 'client_product_title'])
 
         clear_df = df[
-            df['client_product_title'].apply(lambda x: isinstance(x, str))
+            (df['client_product_title'].apply(lambda x: isinstance(x, str))) &
+            (df['client_product_title'].notna())
         ]
 
         return clear_df
@@ -55,7 +56,8 @@ class MultipleBrands(CommonWords):
             .sort_values(by=['brand_name', 'base_product_title'])
 
         clear_df = df[
-            df['base_product_title'].apply(lambda x: isinstance(x, str))
+            (df['base_product_title'].apply(lambda x: isinstance(x, str))) &
+            (df['base_product_title'].notna())
         ]
 
         return clear_df
