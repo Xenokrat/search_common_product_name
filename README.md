@@ -1,6 +1,6 @@
-# search_common_product_name
+# Search Common Product Name
 ## Identify the same product names by comparasing the common string between two given names
-#### All samples in /sample_data directory
+#### Test samples in /sample_data directory
 
 **client_titles.xlsx** template
 
