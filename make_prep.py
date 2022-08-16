@@ -1,6 +1,19 @@
-from lcs import LSC
 import os
 import pandas as pd
+import re
+
+
+def add_space_between_num_and_char(string):
+    numbers = '0123456789'
+    new_string = string
+    for ind in range(len(string) - 1, 0, -1):
+        current_char = string[-ind]
+        previous_char = string[-ind - 1]
+        if current_char not in numbers and previous_char in numbers:
+            new_string = string[:-ind] + ' ' + string[-ind:]
+            break
+
+    return new_string
 
 
 class DataHandler:
@@ -14,19 +27,16 @@ class DataHandler:
         self.client_sku = self.make_client_sku()
         self.ean_code = self.make_ean_code()
         self.base_sku = self.make_base_sku()
+        self.prod_id = self.make_prod_id()
 
-    # @property
-    # def client_sku(self):
-    #     return self.__client_sku
-    #
-    # @property
-    # def ean_code(self):
-    #     print('getter method called')
-    #     return self.__ean_code
-    #
-    # @property
-    # def base_code(self):
-    #     return self.__base_sku
+    @staticmethod
+    def make_pretty_str(string: str) -> str:
+        string = string.lower()
+        string = re.sub('[^\w\s_]', " ", string)
+        string = re.sub("_", " ", string)
+        string = add_space_between_num_and_char(string)
+        string = " ".join(string.split())
+        return string
 
     def make_client_sku(self):
         df = pd.read_excel(self.path_to_client_data)
@@ -40,8 +50,18 @@ class DataHandler:
         if 'EAN_CODE' not in df:
             raise Exception('No "EAN_CODE" column')
         else:
-            df.rename(columns={'Product_Title': 'client_sku'}, inplace=True)
-            return df.loc[:, ['client_sku', 'EAN_CODE']]
+            df.rename(columns={'Product_Title': 'client_product_title'},
+                      inplace=True)
+            return df.loc[:, ['client_product_title', 'EAN_CODE']]
+
+    def make_prod_id(self):
+        df = pd.read_excel(self.path_to_base_data)
+        if 'product_id' not in df:
+            raise Exception('No "product_id" column')
+        else:
+            df.rename(columns={'Product_Title': 'base_product_title'},
+                      inplace=True)
+            return df.loc[:, ['base_product_title', 'product_id']]
 
     def make_base_sku(self):
         df = pd.read_excel(self.path_to_base_data)
@@ -50,7 +70,7 @@ class DataHandler:
         else:
             return df['Product_Title']
 
-    def cross_join(self):
+    def cross_join_table(self):
         client_data_var = self.client_sku
         base_data_var = self.base_sku
 
@@ -63,12 +83,4 @@ class DataHandler:
         df = client_data_var.merge(base_data_var, on='key', how='outer')
         del df['key']
 
-        res = (
-            df['client_product_title'],
-            df['base_product_title'],
-        )
-        return res
-
-
-class DataSaver:
-    pass
+        return df

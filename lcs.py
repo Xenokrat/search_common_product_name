@@ -1,12 +1,18 @@
 import pandas as pd
-import re
+from make_prep import DataHandler
 
 
-class LSC:
-    def __init__(self, client_sku: pd.Series, base_sku: pd.Series):
-        self.client_sku = client_sku
-        self.base_sku = base_sku
-        self.common_string = pd.Series(dtype=str)
+class LSC(DataHandler):
+    def __init__(self, path_to_client_data, path_to_base_data):
+        super().__init__(
+            path_to_client_data,
+            path_to_base_data,
+        )
+        self.client_sku = self.make_client_sku()
+        self.ean_code = self.make_ean_code()
+        self.base_sku = self.make_base_sku()
+
+        self.common_string = None
 
     def __repr__(self):
         return f'''Class: {self.__class__}, 
@@ -44,13 +50,6 @@ class LSC:
                 [self.common_string, pd.Series(parsed_common_string, dtype=str)],
                 ignore_index=True
             )
-
-    @staticmethod
-    def make_pretty_str(string: str) -> str:
-        string = string.lower()
-        string = re.sub('[^\w\s]', "", string)
-        string = " ".join(string.split())
-        return string
 
     def longest_common_string(self, str1: str, str2: str) -> list[str]:
         str1 = self.make_pretty_str(str1)
