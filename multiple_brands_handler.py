@@ -5,7 +5,6 @@ from common_words_tokens import CommonWords
 
 class MultipleBrands(CommonWords):
     def __init__(self, path_to_client_data: str, path_to_base_data: str):
-        super().__init__(path_to_client_data, path_to_base_data)
         assert os.path.exists(path_to_client_data), \
             f'{path_to_client_data} do not exists'
         assert os.path.exists(path_to_base_data), \
@@ -30,10 +29,14 @@ class MultipleBrands(CommonWords):
         elif 'brand_name' not in df:
             raise Exception('No "brand_name" column')
 
-        df = df['client_product_title', 'ean_code', 'brand_name'] \
+        df = df.loc[:, ['client_product_title', 'ean_code', 'brand_name']] \
             .sort_values(by=['brand_name', 'client_product_title'])
 
-        return df
+        clear_df = df[
+            df['client_product_title'].apply(lambda x: isinstance(x, str))
+        ]
+
+        return clear_df
 
     def make_base_df(self):
         """
@@ -48,15 +51,19 @@ class MultipleBrands(CommonWords):
         elif 'brand_name' not in df:
             raise Exception('No "brand_name" column')
 
-        df = df['base_product_title', 'product_id', 'brand_name']\
+        df = df.loc[:, ['base_product_title', 'product_id', 'brand_name']]\
             .sort_values(by=['brand_name', 'base_product_title'])
 
-        return df
+        clear_df = df[
+            df['base_product_title'].apply(lambda x: isinstance(x, str))
+        ]
+
+        return clear_df
 
     def cross_join_table(self):
         df_cross = \
-            self.__client_df['client_product_title', 'brand_name'].merge(
-                self.__base_df['base_product_title', 'brand_name'],
+            self.__client_df[['client_product_title', 'brand_name']].merge(
+                self.__base_df[['base_product_title', 'brand_name']],
                 on='brand_name',
                 how='outer'
             )
@@ -83,7 +90,7 @@ class MultipleBrands(CommonWords):
         :return: filtered df with ean code
         """
 
-        df = self.cross_join_table()
+        df = self.calc_cw_dataframe()
         grouped_df = df.groupby(
             'client_product_title', 'brand_name', as_index=False
         ).agg({
