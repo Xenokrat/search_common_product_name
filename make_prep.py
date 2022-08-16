@@ -39,6 +39,7 @@ class DataHandler:
             string = " ".join(string.split())
         except AttributeError:
             print(string)
+            raise AttributeError
         return string
 
     def make_client_sku(self):
